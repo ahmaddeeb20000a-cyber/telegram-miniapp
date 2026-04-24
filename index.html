@@ -1,1 +1,98 @@
 
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>تطبيق المهام والنقاط</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            padding: 20px;
+            margin: 0;
+        }
+        .card {
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        button {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            padding: 12px;
+            border-radius: 30px;
+            width: 100%;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+        .points {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div style="text-align:center;">💰 رصيدك</div>
+        <div class="points" id="balance">0</div>
+    </div>
+    <div class="card">
+        <h3>📋 المهام</h3>
+        <button onclick="doTask('انضمام للقناة', 10)">➕ انضم للقناة +10</button>
+        <button onclick="doTask('مشاركة البوت', 15)">📤 شارك البوت +15</button>
+        <button onclick="watchAd()">📺 مشاهدة إعلان +5</button>
+    </div>
+    <div class="card">
+        <h3>💸 سحب USDT</h3>
+        <button onclick="requestWithdraw()">سحب (100 نقطة = 1 USDT)</button>
+    </div>
+    <div class="card">
+        <h3>👥 الإحالات</h3>
+        <button onclick="copyReferral()">🔗 نسخ رابط الإحالة</button>
+    </div>
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        let userPoints = 0;
+        let userId = tg.initDataUnsafe?.user?.id || 'guest';
+        
+        function updateBalance() {
+            document.getElementById('balance').innerText = userPoints;
+        }
+        
+        function doTask(name, reward) {
+            userPoints += reward;
+            updateBalance();
+            tg.sendData(JSON.stringify({action: 'add_points', amount: reward}));
+            tg.showPopup({title: '✅ مكسب', message: `+${reward} نقطة`, buttons: [{type: 'ok'}]});
+        }
+        
+        function watchAd() {
+            tg.showPopup({title: '📺 إعلان', message: 'تمت المشاهدة +5 نقاط', buttons: [{type: 'ok'}]});
+            doTask('اعلان', 5);
+        }
+        
+        function requestWithdraw() {
+            if(userPoints < 100) {
+                tg.showAlert('❌ رصيدك أقل من 100 نقطة');
+                return;
+            }
+            tg.showPopup({title: 'سحب USDT', message: `ارسل عنوان محفظتك لسحب ${userPoints/100} USDT`, buttons: [{type: 'ok'}]});
+        }
+        
+        function copyReferral() {
+            let link = `https://t.me/YourBot?start=ref_${userId}`;
+            navigator.clipboard.writeText(link);
+            tg.showAlert('✅ تم نسخ رابط الإحالة');
+        }
+        
+        updateBalance();
+    </script>
+</body>
+</html>
