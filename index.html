@@ -3,23 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>مشروعي - ربح النقاط</title>
+    <title>مشروعي - الاحترافي</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             color: white;
             font-family: 'Segoe UI', sans-serif;
-            padding: 16px;
+            padding: 20px;
             min-height: 100vh;
         }
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 60px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+        }
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        .user-info h3 { font-size: 18px; }
+        .user-info p { font-size: 12px; opacity: 0.7; }
         .card {
             background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
             border-radius: 24px;
             padding: 20px;
             margin-bottom: 16px;
-            backdrop-filter: blur(10px);
         }
         .points {
             font-size: 48px;
@@ -28,18 +49,29 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            text-align: center;
         }
         button {
             background: linear-gradient(135deg, #FFD700, #FFA500);
             border: none;
-            padding: 12px 20px;
+            padding: 12px;
             border-radius: 40px;
             font-weight: bold;
             width: 100%;
             margin: 8px 0;
             cursor: pointer;
+            transition: transform 0.2s;
         }
-        .task {
+        button:active { transform: scale(0.97); }
+        .lang-select {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .task-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -51,67 +83,77 @@
     </style>
 </head>
 <body>
+    <div class="profile">
+        <div class="avatar" id="avatar">👤</div>
+        <div class="user-info">
+            <h3 id="userName">Loading...</h3>
+            <p id="userID">@username</p>
+        </div>
+        <select id="language" class="lang-select" onchange="changeLanguage()">
+            <option value="ar">🇸🇦 العربية</option>
+            <option value="en">🇬🇧 English</option>
+        </select>
+    </div>
+
     <div class="card">
-        <div style="text-align:center;">💰 رصيد النقاط</div>
         <div class="points" id="points">0</div>
-        <div style="text-align:center;">≈ <span id="usd">0</span> USDT (1000 نقطة = 1$)</div>
+        <div style="text-align:center;">≈ <span id="usd">0</span> USDT</div>
     </div>
 
     <div class="card">
-        <h3>📺 روابط إعلانية</h3>
-        <div id="linksList">جاري التحميل...</div>
-        <button onclick="fetchLinks()">🔄 تحديث الروابط</button>
+        <h3 id="tasksTitle">📋 المهام</h3>
+        <div id="tasksList"></div>
     </div>
 
     <div class="card">
-        <h3>👥 الإحالات</h3>
-        <button onclick="copyReferral()">🔗 نسخ رابط الإحالة</button>
-        <p id="refCount">👥 مدعوين: 0</p>
+        <h3 id="withdrawTitle">💸 السحب</h3>
+        <button id="withdrawBtn" onclick="requestWithdraw()">💸 سحب USDT</button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        let userId = tg.initDataUnsafe?.user?.id;
+        tg.ready();
+        
+        let user = tg.initDataUnsafe?.user || {};
+        let userId = user.id;
+        let userName = user.first_name || "User";
+        let userUsername = user.username || "username";
         let points = 0;
-
-        function updateUI() {
-            document.getElementById('points').innerText = points;
-            document.getElementById('usd').innerText = (points / 1000).toFixed(2);
-        }
-
-        async function fetchLinks() {
-            // هنا تجيب الروابط من البوت
-            let links = [
-                { title: "📢 إعلان 1", reward: 5, url: "https://example.com/1" },
-                { title: "🎬 إعلان 2", reward: 10, url: "https://example.com/2" }
-            ];
-            let html = '';
-            for(let link of links) {
-                html += `<div class="task">
-                    <span>${link.title} (+${link.reward})</span>
-                    <button onclick="watchLink('${link.url}', ${link.reward})">مشاهدة</button>
-                </div>`;
+        let currentLang = localStorage.getItem('lang') || 'ar';
+        
+        document.getElementById('language').value = currentLang;
+        document.getElementById('userName').innerText = userName;
+        document.getElementById('userID').innerText = `@${userUsername}`;
+        
+        const translations = {
+            ar: {
+                tasks: "📋 المهام",
+                withdraw: "💸 السحب",
+                withdrawBtn: "💸 سحب USDT",
+                task1: "📢 انضم للقناة",
+                task2: "🤖 اشترك في البوت",
+                task3: "👥 انضم للمجموعة"
+            },
+            en: {
+                tasks: "📋 Tasks",
+                withdraw: "💸 Withdraw",
+                withdrawBtn: "💸 Withdraw USDT",
+                task1: "📢 Join Channel",
+                task2: "🤖 Subscribe to Bot",
+                task3: "👥 Join Group"
             }
-            document.getElementById('linksList').innerHTML = html || "لا توجد روابط حالياً";
+        };
+        
+        function updateLanguage() {
+            let t = translations[currentLang];
+            document.getElementById('tasksTitle').innerText = t.tasks;
+            document.getElementById('withdrawTitle').innerText = t.withdraw;
+            document.getElementById('withdrawBtn').innerText = t.withdrawBtn;
         }
-
-        function watchLink(url, reward) {
-            window.open(url, '_blank');
-            points += reward;
-            updateUI();
-            tg.sendData(JSON.stringify({action: 'add_points', amount: reward, reason: 'مشاهدة إعلان'}));
-            tg.showAlert(`✅ +${reward} نقطة!`);
-        }
-
-        function copyReferral() {
-            let link = `https://t.me/YOUR_BOT_USERNAME?start=ref_${userId}`;
-            navigator.clipboard.writeText(link);
-            tg.showAlert('✅ تم نسخ رابط الإحالة');
-        }
-
-        fetchLinks();
-        updateUI();
-    </script>
-</body>
-</html>
+        
+        function changeLanguage() {
+            currentLang = document.getElementById('language').value;
+            localStorage.setItem('lang', currentLang);
+            updateLanguage();
+            tg.sendData(JSON.stringify({
