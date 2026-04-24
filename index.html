@@ -6,448 +6,112 @@
     <title>مشروعي - ربح النقاط</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', 'Tahoma', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
             padding: 16px;
             min-height: 100vh;
         }
-
-        /* البطاقة الرئيسية للرصيد */
-        .balance-card {
-            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
-            border-radius: 32px;
-            padding: 24px 20px;
-            text-align: center;
-            margin-bottom: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
+        .card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(10px);
         }
-
-        .balance-label {
-            font-size: 14px;
-            opacity: 0.8;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .balance-value {
+        .points {
             font-size: 48px;
             font-weight: bold;
             background: linear-gradient(135deg, #FFD700, #FFA500);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            line-height: 1;
         }
-
-        .balance-usd {
-            font-size: 14px;
-            opacity: 0.7;
-            margin-top: 8px;
-        }
-
-        /* أزرار التبويب */
-        .tabs {
-            display: flex;
-            gap: 8px;
-            background: rgba(255,255,255,0.05);
-            padding: 6px;
-            border-radius: 60px;
-            margin-bottom: 24px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            background: transparent;
-            border: none;
-            padding: 12px;
-            border-radius: 40px;
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .tab-btn.active {
+        button {
             background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #1a1a2e;
-            box-shadow: 0 4px 12px rgba(255,215,0,0.3);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            width: 100%;
+            margin: 8px 0;
+            cursor: pointer;
         }
-
-        /* محتوى التبويبات */
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.4s ease;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* الكروت */
-        .task-card {
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            padding: 16px;
-            margin-bottom: 12px;
+        .task {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: transform 0.2s;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .task-card:active {
-            transform: scale(0.98);
-        }
-
-        .task-info h4 {
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-
-        .task-info p {
-            font-size: 12px;
-            opacity: 0.7;
-        }
-
-        .task-reward {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #1a1a2e;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        /* زر الإعلان المميز */
-        .ad-card {
-            background: linear-gradient(135deg, #e65c00, #F9D423);
-            border-radius: 24px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .ad-card:active {
-            transform: scale(0.97);
-        }
-
-        /* نظام الإحالة */
-        .referral-box {
-            background: rgba(255,255,255,0.05);
-            border-radius: 60px;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            word-break: break-all;
-        }
-
-        .referral-link {
-            font-size: 12px;
-            opacity: 0.8;
-            flex: 1;
-        }
-
-        .copy-btn {
-            background: #FFD700;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .stat {
-            display: flex;
-            justify-content: space-between;
             padding: 12px;
             background: rgba(255,255,255,0.05);
             border-radius: 16px;
-            margin-top: 12px;
-        }
-
-        /* مؤشر تحميل */
-        .loader {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #fff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 0.6s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        button {
-            cursor: pointer;
+            margin-bottom: 8px;
         }
     </style>
 </head>
 <body>
-
-<div class="balance-card">
-    <div class="balance-label">💰 رصيد النقاط</div>
-    <div class="balance-value" id="pointsDisplay">0</div>
-    <div class="balance-usd">≈ <span id="usdDisplay">0</span> USDT (100 نقطة = 1 USDT)</div>
-</div>
-
-<div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('tasks')">📋 مهام</button>
-    <button class="tab-btn" onclick="switchTab('referrals')">👥 إحالات</button>
-    <button class="tab-btn" onclick="switchTab('history')">📜 السجل</button>
-</div>
-
-<!-- تبويب المهام -->
-<div id="tasksTab" class="tab-content active">
-    <div class="ad-card" id="adBtn">
-        🎬 <strong>شاهد إعلان فيديو</strong> 🎬<br>
-        <small>+5 نقاط + فرصة لمضاعفة المكافأة!</small>
+    <div class="card">
+        <div style="text-align:center;">💰 رصيد النقاط</div>
+        <div class="points" id="points">0</div>
+        <div style="text-align:center;">≈ <span id="usd">0</span> USDT (1000 نقطة = 1$)</div>
     </div>
 
-    <div class="task-card" data-reward="10" data-task="انضمام للقناة">
-        <div class="task-info">
-            <h4>📢 انضم لقناة البوت</h4>
-            <p>تابع القناة لمتابعة العروض</p>
-        </div>
-        <div class="task-reward">+10</div>
+    <div class="card">
+        <h3>📺 روابط إعلانية</h3>
+        <div id="linksList">جاري التحميل...</div>
+        <button onclick="fetchLinks()">🔄 تحديث الروابط</button>
     </div>
 
-    <div class="task-card" data-reward="15" data-task="مشاركة البوت">
-        <div class="task-info">
-            <h4>📤 شارك البوت مع صديق</h4>
-            <p>ارسل الرابط لصديقك</p>
-        </div>
-        <div class="task-reward">+15</div>
+    <div class="card">
+        <h3>👥 الإحالات</h3>
+        <button onclick="copyReferral()">🔗 نسخ رابط الإحالة</button>
+        <p id="refCount">👥 مدعوين: 0</p>
     </div>
 
-    <div class="task-card" data-reward="20" data-task="متابعة تويتر">
-        <div class="task-info">
-            <h4>🐦 تابعنا على تويتر</h4>
-            <p>حساب العروض الحصرية</p>
-        </div>
-        <div class="task-reward">+20</div>
-    </div>
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        let userId = tg.initDataUnsafe?.user?.id;
+        let points = 0;
 
-    <div class="task-card" data-reward="25" data-task="انضمام لمجموعة التليجرام">
-        <div class="task-info">
-            <h4>👥 انضم للمجموعة</h4>
-            <p>تفاعل مع المجتمع</p>
-        </div>
-        <div class="task-reward">+25</div>
-    </div>
-</div>
-
-<!-- تبويب الإحالات -->
-<div id="referralsTab" class="tab-content">
-    <div class="referral-box">
-        <span class="referral-link" id="referralLink">جارٍ التحميل...</span>
-        <button class="copy-btn" onclick="copyReferralLink()">نسخ</button>
-    </div>
-    <div class="stat">
-        <span>👥 عدد المدعوين:</span>
-        <span id="referralCount">0</span>
-    </div>
-    <div class="stat">
-        <span>🎁 مكافأة الإحالة:</span>
-        <span>50 نقطة لكل مدعو</span>
-    </div>
-    <div style="margin-top: 20px; text-align: center; font-size: 12px; opacity: 0.6;">
-        كل شخص يدخل عن طريق رابطك يمنحك 50 نقطة فوراً
-    </div>
-</div>
-
-<!-- تبويب السجل -->
-<div id="historyTab" class="tab-content">
-    <div id="historyList" style="max-height: 400px; overflow-y: auto;">
-        <div style="text-align: center; opacity: 0.6; padding: 20px;">✨ أكمل مهامك لتظهر أرباحك هنا</div>
-    </div>
-</div>
-
-<script>
-    // تهيئة التطبيق
-    let tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.ready();
-    
-    // بيانات المستخدم
-    let userPoints = 0;
-    let userId = tg.initDataUnsafe?.user?.id || 'guest_' + Math.floor(Math.random() * 10000);
-    let referralCount = 0;
-    let history = [];  // مصفوفة لتخزين المعاملات
-    
-    // جلب البيانات المخزنة (من localStorage للتجربة، لكن الأفضل من البوت)
-    function loadData() {
-        let saved = localStorage.getItem(`miniApp_${userId}`);
-        if(saved) {
-            let data = JSON.parse(saved);
-            userPoints = data.points || 0;
-            referralCount = data.refCount || 0;
-            history = data.history || [];
+        function updateUI() {
+            document.getElementById('points').innerText = points;
+            document.getElementById('usd').innerText = (points / 1000).toFixed(2);
         }
+
+        async function fetchLinks() {
+            // هنا تجيب الروابط من البوت
+            let links = [
+                { title: "📢 إعلان 1", reward: 5, url: "https://example.com/1" },
+                { title: "🎬 إعلان 2", reward: 10, url: "https://example.com/2" }
+            ];
+            let html = '';
+            for(let link of links) {
+                html += `<div class="task">
+                    <span>${link.title} (+${link.reward})</span>
+                    <button onclick="watchLink('${link.url}', ${link.reward})">مشاهدة</button>
+                </div>`;
+            }
+            document.getElementById('linksList').innerHTML = html || "لا توجد روابط حالياً";
+        }
+
+        function watchLink(url, reward) {
+            window.open(url, '_blank');
+            points += reward;
+            updateUI();
+            tg.sendData(JSON.stringify({action: 'add_points', amount: reward, reason: 'مشاهدة إعلان'}));
+            tg.showAlert(`✅ +${reward} نقطة!`);
+        }
+
+        function copyReferral() {
+            let link = `https://t.me/YOUR_BOT_USERNAME?start=ref_${userId}`;
+            navigator.clipboard.writeText(link);
+            tg.showAlert('✅ تم نسخ رابط الإحالة');
+        }
+
+        fetchLinks();
         updateUI();
-    }
-    
-    function saveData() {
-        let data = {
-            points: userPoints,
-            refCount: referralCount,
-            history: history
-        };
-        localStorage.setItem(`miniApp_${userId}`, JSON.stringify(data));
-        // إرسال إلى البوت
-        tg.sendData(JSON.stringify({action: 'sync', points: userPoints, refCount: referralCount}));
-    }
-    
-    function updateUI() {
-        document.getElementById('pointsDisplay').innerText = userPoints;
-        let usdt = (userPoints / 100).toFixed(2);
-        document.getElementById('usdDisplay').innerText = usdt;
-        document.getElementById('referralCount').innerText = referralCount;
-        updateHistoryUI();
-    }
-    
-    function addPoints(amount, reason) {
-        userPoints += amount;
-        history.unshift({
-            date: new Date().toLocaleString(),
-            amount: amount,
-            reason: reason,
-            type: 'plus'
-        });
-        if(history.length > 20) history.pop();
-        updateUI();
-        saveData();
-        
-        // إظهار إشعار جميل
-        tg.showPopup({
-            title: '🎉 مكسب!',
-            message: `حصلت على +${amount} نقطة\nسبب: ${reason}`,
-            buttons: [{type: 'ok'}]
-        });
-    }
-    
-    function updateHistoryUI() {
-        let container = document.getElementById('historyList');
-        if(history.length === 0) {
-            container.innerHTML = '<div style="text-align: center; opacity: 0.6; padding: 20px;">✨ أكمل مهامك لتظهر أرباحك هنا</div>';
-            return;
-        }
-        let html = '';
-        for(let item of history) {
-            html += `
-                <div style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between;">
-                    <div>
-                        <strong>+${item.amount}</strong><br>
-                        <small>${item.reason}</small>
-                    </div>
-                    <small style="opacity:0.6;">${item.date}</small>
-                </div>
-            `;
-        }
-        container.innerHTML = html;
-    }
-    
-    // المهام
-    document.querySelectorAll('.task-card').forEach(card => {
-        card.addEventListener('click', () => {
-            let reward = parseInt(card.getAttribute('data-reward'));
-            let taskName = card.getAttribute('data-task');
-            // هنا يمكنك لاحقاً إضافة تحقق حقيقي من انضمامه للقناة عبر البوت
-            addPoints(reward, taskName);
-        });
-    });
-    
-    // الإعلان المميز
-    let adBtn = document.getElementById('adBtn');
-    adBtn.addEventListener('click', () => {
-        // محاكاة مشاهدة إعلان
-        let baseReward = 5;
-        let bonus = Math.random() > 0.7 ? 3 : 0;  // 30% فرصة مكافأة إضافية
-        let total = baseReward + bonus;
-        let msg = bonus > 0 ? `🎉 ربحت ${total} نقطة (${baseReward} + ${bonus} مكافأة الحظ!)` : `📺 ربحت ${total} نقطة`;
-        addPoints(total, 'مشاهدة إعلان' + (bonus>0 ? ' + مكافأة الحظ' : ''));
-        tg.showAlert(msg);
-    });
-    
-    // الإحالات
-    function getBotUsername() {
-        // حاول الحصول على معرف البوت من التطبيق
-        return tg.initDataUnsafe?.user?.username ? 'YourBot' : 'YourBot';
-    }
-    
-    function getReferralLink() {
-        let botName = "YourBot"; // غيرها لاسم البوت الحقيقي
-        return `https://t.me/${botName}?start=ref_${userId}`;
-    }
-    
-    function updateReferralLink() {
-        let linkSpan = document.getElementById('referralLink');
-        if(linkSpan) linkSpan.innerText = getReferralLink();
-    }
-    
-    function copyReferralLink() {
-        let link = getReferralLink();
-        navigator.clipboard.writeText(link);
-        tg.showAlert('✅ تم نسخ رابط الإحالة');
-    }
-    
-    // تبديل التبويبات
-    window.switchTab = function(tabName) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        
-        if(tabName === 'tasks') document.getElementById('tasksTab').classList.add('active');
-        else if(tabName === 'referrals') document.getElementById('referralsTab').classList.add('active');
-        else if(tabName === 'history') document.getElementById('historyTab').classList.add('active');
-        
-        let activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => btn.innerText.includes(tabName === 'tasks' ? 'مهام' : (tabName === 'referrals' ? 'إحالات' : 'السجل')));
-        if(activeBtn) activeBtn.classList.add('active');
-    };
-    
-    // مكافأة يومية (تظهر مرة كل 24 ساعة)
-    function checkDailyReward() {
-        let lastDaily = localStorage.getItem(`daily_${userId}`);
-        let now = new Date().toDateString();
-        if(lastDaily !== now) {
-            let reward = 25 + Math.floor(Math.random() * 40);
-            addPoints(reward, '✨ المكافأة اليومية ✨');
-            localStorage.setItem(`daily_${userId}`, now);
-            tg.showAlert(`🎁 مرحباً بك اليوم! حصلت على ${reward} نقطة مكافأة يومية.`);
-        }
-    }
-    
-    // تحميل البيانات وبدء التطبيق
-    loadData();
-    updateReferralLink();
-    checkDailyReward();
-    
-    // كل 30 ثانية حفظ (للتأكيد)
-    setInterval(() => {
-        saveData();
-    }, 30000);
-    
-</script>
+    </script>
 </body>
 </html>
