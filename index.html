@@ -3,610 +3,268 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Surf & Earn - احترافي</title>
+    <title>مهامي - ربح النقاط</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
-            color: #fff;
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-            padding: 20px 16px 100px 16px;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
             min-height: 100vh;
         }
-
-        /* شريط اللغة والرصيد */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .lang-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            padding: 8px 16px;
+        .balance-card {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
             border-radius: 30px;
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .balance-small {
-            background: rgba(255,215,0,0.2);
-            padding: 6px 12px;
-            border-radius: 30px;
-            font-size: 12px;
-        }
-
-        /* بطاقة الرصيد الرئيسية */
-        .main-card {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            border-radius: 40px;
-            padding: 30px 20px;
+            padding: 20px;
             text-align: center;
             margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-
-        .points-large {
-            font-size: 64px;
-            font-weight: 800;
+        .balance {
+            font-size: 48px;
+            font-weight: bold;
             background: linear-gradient(135deg, #FFD700, #FFA500);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            letter-spacing: 2px;
         }
-
-        .usd-value {
-            font-size: 18px;
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-
-        /* أزرار الإيداع/السحب */
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .action-btn {
-            flex: 1;
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 12px;
-            border-radius: 30px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .action-btn:active {
-            transform: scale(0.97);
-            background: rgba(255,255,255,0.25);
-        }
-
-        .action-btn.primary {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #1a1a2e;
-            border: none;
-        }
-
-        /* قسم المهام والإعلانات */
-        .section-title {
-            font-size: 18px;
-            margin: 20px 0 12px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
         .task-card {
-            background: rgba(255,255,255,0.08);
-            border-radius: 20px;
-            padding: 14px 16px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.2s;
-        }
-
-        .task-card:active {
-            transform: scale(0.98);
-            background: rgba(255,255,255,0.12);
-        }
-
-        .task-info h4 {
-            font-size: 15px;
-            margin-bottom: 4px;
-        }
-
-        .task-info p {
-            font-size: 11px;
-            opacity: 0.6;
-        }
-
-        .task-reward {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #1a1a2e;
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 13px;
-        }
-
-        /* إعلان مميز */
-        .ad-card {
-            background: linear-gradient(135deg, #e65c00, #F9D423);
-            border-radius: 20px;
-            padding: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            cursor: pointer;
-        }
-
-        .ad-card:active {
-            transform: scale(0.98);
-        }
-
-        /* التبويبات السفلية */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(10,10,20,0.95);
-            backdrop-filter: blur(20px);
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 20px 25px 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .nav-item {
-            text-align: center;
-            cursor: pointer;
-            opacity: 0.5;
-            transition: all 0.2s;
-            padding: 5px 15px;
-            border-radius: 30px;
-        }
-
-        .nav-item.active {
-            opacity: 1;
-            background: rgba(255,215,0,0.2);
-        }
-
-        .nav-icon {
-            font-size: 24px;
-            margin-bottom: 4px;
-        }
-
-        .nav-label {
-            font-size: 11px;
-        }
-
-        /* محتوى التبويبات */
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* كروت الأرباح */
-        .earning-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        /* كروت الأصدقاء */
-        .referral-card {
-            background: rgba(255,215,0,0.1);
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        .referral-link {
             background: rgba(255,255,255,0.1);
-            padding: 12px;
-            border-radius: 40px;
-            font-size: 12px;
-            word-break: break-all;
-            margin: 10px 0;
-        }
-
-        /* محفظة */
-        .wallet-card {
-            background: rgba(255,255,255,0.05);
             border-radius: 20px;
-            padding: 16px;
+            padding: 15px;
             margin-bottom: 12px;
         }
-
-        .withdraw-history {
-            max-height: 300px;
-            overflow-y: auto;
+        button {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
         }
+        .youtube-player {
+            margin: 10px 0;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .hidden { display: none; }
+        .status { font-size: 12px; margin-top: 5px; color: #aaa; }
     </style>
 </head>
 <body>
 
-<!-- الشريط العلوي -->
-<div class="top-bar">
-    <button class="lang-btn" onclick="toggleLanguage()" id="langBtn">🇸🇦 العربية</button>
-    <div class="balance-small" id="smallBalance">0 نقطة</div>
+<div class="balance-card">
+    <div>💰 رصيدك</div>
+    <div class="balance" id="balance">0</div>
+    <div>≈ <span id="usd">0</span> USDT</div>
 </div>
 
-<!-- بطاقة الرصيد الرئيسية -->
-<div class="main-card">
-    <div class="points-large" id="pointsDisplay">0</div>
-    <div class="usd-value" id="usdDisplay">≈ 0.00 USDT</div>
-    <div class="action-buttons">
-        <button class="action-btn" onclick="showDeposit()">📥 إيداع +</button>
-        <button class="action-btn primary" onclick="showWithdraw()">💸 سحب -</button>
-    </div>
-</div>
-
-<!-- قسم المهام والإعلانات -->
-<div class="section-title">
-    <span>📋</span> <span id="tasksTitle">المهام والاعلانات</span>
-</div>
-
-<!-- إعلان مميز -->
-<div class="ad-card" onclick="watchAd()">
-    <div>🎬 <strong id="adTitle">شاهد إعلان</strong></div>
-    <div class="task-reward">+5</div>
-</div>
-
-<!-- المهام -->
 <div id="tasksContainer"></div>
-
-<!-- محتوى التبويبات -->
-<div id="earningsTab" class="tab-content">
-    <div class="section-title">📊 سجل الأرباح</div>
-    <div id="earningsList"></div>
-</div>
-
-<div id="gamesTab" class="tab-content">
-    <div class="section-title">🎮 ألعاب قادمة</div>
-    <div style="text-align:center; opacity:0.5; padding:40px;">قريباً ألعاب اربح من خلالها نقاط</div>
-</div>
-
-<div id="friendsTab" class="tab-content">
-    <div class="referral-card">
-        <div>👥 اكسب 100 نقطة لكل صديق</div>
-        <div class="referral-link" id="referralLink">جاري التحميل...</div>
-        <button onclick="copyReferral()" style="background:#FFD700; color:#1a1a2e; border:none; padding:10px 20px; border-radius:30px;">📋 نسخ الرابط</button>
-        <div style="margin-top:15px;">👥 عدد المدعوين: <span id="refCount">0</span></div>
-    </div>
-</div>
-
-<div id="walletTab" class="tab-content">
-    <div class="section-title">💳 المحفظة</div>
-    <div class="wallet-card">
-        <div style="display:flex; justify-content:space-between;">
-            <span>💰 رصيد النقاط</span>
-            <span id="walletPoints">0</span>
-        </div>
-        <div style="display:flex; justify-content:space-between; margin-top:10px;">
-            <span>💵 يعادل USDT</span>
-            <span id="walletUsd">0.00</span>
-        </div>
-    </div>
-    <div class="section-title">📜 سجل السحوبات</div>
-    <div id="withdrawHistory" class="withdraw-history"></div>
-</div>
-
-<!-- القائمة السفلية -->
-<div class="bottom-nav">
-    <div class="nav-item active" data-tab="earnings">
-        <div class="nav-icon">📊</div>
-        <div class="nav-label">الأرباح</div>
-    </div>
-    <div class="nav-item" data-tab="games">
-        <div class="nav-icon">🎮</div>
-        <div class="nav-label">ألعاب</div>
-    </div>
-    <div class="nav-item" data-tab="friends">
-        <div class="nav-icon">👥</div>
-        <div class="nav-label">أصدقاء</div>
-    </div>
-    <div class="nav-item" data-tab="wallet">
-        <div class="nav-icon">💳</div>
-        <div class="nav-label">محفظة</div>
-    </div>
-</div>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
     tg.ready();
     
-    // بيانات المستخدم
-    let user = tg.initDataUnsafe?.user || {};
-    let userId = user.id;
-    let userName = user.first_name || "User";
+    let userId = tg.initDataUnsafe?.user?.id;
     let points = 0;
-    let referrals = 0;
-    let earningsHistory = [];
-    let withdrawHistory = [];
-    let currentLang = localStorage.getItem('lang') || 'ar';
-    let completedTasks = JSON.parse(localStorage.getItem(`tasks_${userId}`) || '[]');
+    let completedTasks = [];
     
-    // الترجمة
-    const texts = {
-        ar: {
-            tasksTitle: "📋 المهام والاعلانات",
-            adTitle: "🎬 شاهد إعلان +5",
-            task1: "📢 انضم للقناة",
-            task2: "🤖 اشترك في البوت",
-            task3: "👥 انضم للمجموعة",
-            task4: "📤 شارك البوت",
-            task1Desc: "تابع قناتنا",
-            task2Desc: "اشترك للحصول على عروض",
-            task3Desc: "تفاعل مع المجتمع",
-            task4Desc: "ادعُ أصدقائك",
-            lowBalance: "❌ رصيدك أقل من 500 نقطة للحد الأدنى للسحب",
-            withdrawSuccess: "✅ تم طلب سحب {amount} USDT بنجاح",
-            copySuccess: "✅ تم نسخ رابط الإحالة"
-        },
-        en: {
-            tasksTitle: "📋 Tasks & Ads",
-            adTitle: "🎬 Watch Ad +5",
-            task1: "📢 Join Channel",
-            task2: "🤖 Subscribe to Bot",
-            task3: "👥 Join Group",
-            task4: "📤 Share Bot",
-            task1Desc: "Follow our channel",
-            task2Desc: "Subscribe for offers",
-            task3Desc: "Interact with community",
-            task4Desc: "Invite your friends",
-            lowBalance: "❌ Your balance is less than 500 points (minimum withdrawal)",
-            withdrawSuccess: "✅ Withdrawal request for {amount} USDT sent successfully",
-            copySuccess: "✅ Referral link copied"
+    // تحميل الرصيد من البوت (اختياري، يمكن استلامه من البوت)
+    function updateBalanceUI() {
+        document.getElementById('balance').innerText = points;
+        document.getElementById('usd').innerText = (points / 1000).toFixed(2);
+    }
+    
+    // إرسال إكمال مهمة إلى البوت
+    function completeTask(taskId) {
+        tg.sendData(JSON.stringify({ action: 'complete_task', task_id: taskId }));
+        tg.showAlert('✅ جارٍ التحقق من إتمام المهمة...');
+    }
+    
+    // مشاهدة فيديو يوتيوب مع مؤقت 30 ثانية
+    let player;
+    let currentTaskId = null;
+    let timerStarted = false;
+    
+    function onYouTubeIframeAPIReady() {
+        // سيتم إنشاء اللاعب عند الضغط على المهمة
+    }
+    
+    function watchYouTube(taskId, videoUrl, reward) {
+        currentTaskId = taskId;
+        // استخراج ID الفيديو من الرابط
+        let videoId = extractVideoId(videoUrl);
+        if (!videoId) {
+            tg.showAlert('رابط الفيديو غير صالح');
+            return;
         }
-    };
-    
-    function t(key) {
-        return texts[currentLang][key] || key;
+        
+        // إنشاء نافذة منبثقة لعرض الفيديو
+        let modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.backgroundColor = 'rgba(0,0,0,0.9)';
+        modal.style.zIndex = '1000';
+        modal.style.display = 'flex';
+        modal.style.flexDirection = 'column';
+        modal.style.justifyContent = 'center';
+        modal.style.alignItems = 'center';
+        
+        let container = document.createElement('div');
+        container.style.width = '100%';
+        container.style.maxWidth = '400px';
+        container.style.backgroundColor = '#000';
+        container.style.borderRadius = '15px';
+        container.style.overflow = 'hidden';
+        
+        let iframe = document.createElement('iframe');
+        iframe.width = '100%';
+        iframe.height = '250';
+        iframe.src = `https://www.youtube.com/embed/${videoId}?enablejsapi=1`;
+        iframe.frameBorder = '0';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+        
+        let timerDiv = document.createElement('div');
+        timerDiv.style.padding = '15px';
+        timerDiv.style.textAlign = 'center';
+        timerDiv.style.color = 'white';
+        timerDiv.innerHTML = '⏳ يرجى مشاهدة الفيديو لمدة 30 ثانية... <span id="timer">0</span>/30';
+        
+        let completeBtn = document.createElement('button');
+        completeBtn.innerText = '✅ تمت المشاهدة';
+        completeBtn.style.margin = '10px';
+        completeBtn.disabled = true;
+        completeBtn.onclick = () => {
+            document.body.removeChild(modal);
+            completeTask(taskId);
+        };
+        
+        container.appendChild(iframe);
+        container.appendChild(timerDiv);
+        container.appendChild(completeBtn);
+        modal.appendChild(container);
+        document.body.appendChild(modal);
+        
+        // بدء المؤقت
+        let seconds = 0;
+        let interval = setInterval(() => {
+            seconds++;
+            document.getElementById('timer').innerText = seconds;
+            if (seconds >= 30) {
+                clearInterval(interval);
+                completeBtn.disabled = false;
+                timerDiv.innerHTML = '✅ يمكنك الآن إكمال المهمة';
+            }
+        }, 1000);
     }
     
-    function updateUI() {
-        document.getElementById('pointsDisplay').innerText = points;
-        document.getElementById('smallBalance').innerText = points + ' نقطة';
-        document.getElementById('usdDisplay').innerHTML = `≈ ${(points/1000).toFixed(2)} USDT`;
-        document.getElementById('walletPoints').innerText = points;
-        document.getElementById('walletUsd').innerText = (points/1000).toFixed(2);
-        document.getElementById('refCount').innerText = referrals;
-        
-        // تحديث الترجمة
-        document.getElementById('tasksTitle').innerText = t('tasksTitle');
-        document.getElementById('adTitle').innerHTML = t('adTitle');
-        
-        // حفظ البيانات محلياً
-        localStorage.setItem(`points_${userId}`, points);
-        localStorage.setItem(`refs_${userId}`, referrals);
+    function extractVideoId(url) {
+        let patterns = [
+            /(?:youtube\.com\/watch\?v=)([^&]+)/,
+            /(?:youtu\.be\/)([^?]+)/,
+            /(?:youtube\.com\/embed\/)([^?]+)/
+        ];
+        for (let p of patterns) {
+            let match = url.match(p);
+            if (match) return match[1];
+        }
+        return null;
     }
     
-    function loadData() {
-        let savedPoints = localStorage.getItem(`points_${userId}`);
-        let savedRefs = localStorage.getItem(`refs_${userId}`);
-        let savedEarnings = localStorage.getItem(`earnings_${userId}`);
-        let savedWithdraws = localStorage.getItem(`withdraws_${userId}`);
-        
-        points = savedPoints ? parseInt(savedPoints) : 0;
-        referrals = savedRefs ? parseInt(savedRefs) : 0;
-        earningsHistory = savedEarnings ? JSON.parse(savedEarnings) : [];
-        withdrawHistory = savedWithdraws ? JSON.parse(savedWithdraws) : [];
-        
-        updateUI();
-        loadTasks();
-        updateEarningsList();
-        updateWithdrawHistory();
+    // فتح رابط مباشر
+    function openDirectLink(taskId, url, reward) {
+        window.open(url, '_blank');
+        tg.showAlert('🔗 تم فتح الرابط، اضغط "تم" بعد فتحه');
+        // بعد 5 ثوانٍ نعطي خيار إكمال المهمة
+        setTimeout(() => {
+            tg.showPopup({
+                title: 'هل فتحت الرابط؟',
+                message: `إذا كنت قد فتحت الرابط، اضغط "نعم" لاستلام ${reward} نقطة`,
+                buttons: [{type: 'ok', text: 'نعم'}, {type: 'cancel', text: 'لا'}]
+            }, (btnId) => {
+                if (btnId === 'ok') {
+                    completeTask(taskId);
+                }
+            });
+        }, 3000);
     }
     
-    function addPoints(amount, reason) {
-        points += amount;
-        earningsHistory.unshift({
-            date: new Date().toLocaleString(),
-            amount: amount,
-            reason: reason
-        });
-        if(earningsHistory.length > 20) earningsHistory.pop();
-        
-        updateUI();
-        updateEarningsList();
-        localStorage.setItem(`earnings_${userId}`, JSON.stringify(earningsHistory));
-        
-        tg.showPopup({
-            title: '🎉 ربحت!',
-            message: `+${amount} نقطة\nالسبب: ${reason}`,
-            buttons: [{type: 'ok'}]
-        });
-        
-        // إرسال إلى البوت
-        tg.sendData(JSON.stringify({action: 'add_points', amount: amount, reason: reason}));
+    // الاشتراك في قناة
+    function joinChannel(taskId, channelUrl, reward) {
+        window.open(channelUrl, '_blank');
+        tg.showAlert('📢 اشترك في القناة، ثم اضغط "تم"');
+        setTimeout(() => {
+            tg.showPopup({
+                title: 'هل اشتركت؟',
+                message: `بعد الاشتراك، اضغط "نعم" لاستلام ${reward} نقطة`,
+                buttons: [{type: 'ok', text: 'نعم'}, {type: 'cancel', text: 'لا'}]
+            }, (btnId) => {
+                if (btnId === 'ok') {
+                    completeTask(taskId);
+                }
+            });
+        }, 5000);
     }
     
-    function loadTasks() {
+    // عرض المهام
+    async function loadTasks() {
+        // مهام ثابتة كمثال
         const tasks = [
-            { id: 1, name: t('task1'), desc: t('task1Desc'), reward: 10 },
-            { id: 2, name: t('task2'), desc: t('task2Desc'), reward: 15 },
-            { id: 3, name: t('task3'), desc: t('task3Desc'), reward: 20 },
-            { id: 4, name: t('task4'), desc: t('task4Desc'), reward: 25 }
+            { id: "task1", type: "youtube", name: "🎬 شاهد فيديو يوتيوب", target: "https://youtu.be/0O2UNRSFWSY?si=g8w82cygunrMZK1f", reward: 10 },
+            { id: "task2", type: "direct_link", name: "🔗 افتح الرابط المباشر", target: "https://omg10.com/4/10881167", reward: 5 },
+            { id: "task3", type: "channel", name: "📢 اشترك في القناة", target: "https://t.me/masda1102", reward: 15 }
         ];
         
         let container = document.getElementById('tasksContainer');
-        let html = '';
-        for(let task of tasks) {
-            let isCompleted = completedTasks.includes(task.id);
-            html += `
-                <div class="task-card" onclick="${!isCompleted ? `completeTask(${task.id}, ${task.reward}, '${task.name}')` : ''}" style="opacity: ${isCompleted ? 0.5 : 1}">
-                    <div class="task-info">
-                        <h4>${task.name}</h4>
-                        <p>${task.desc}</p>
+        container.innerHTML = '';
+        
+        for (let task of tasks) {
+            let card = document.createElement('div');
+            card.className = 'task-card';
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${task.name}</strong>
+                        <div class="status">+${task.reward} نقطة</div>
                     </div>
-                    <div class="task-reward">+${task.reward}</div>
+                    <button class="task-btn" data-id="${task.id}" data-type="${task.type}" data-target="${task.target}" data-reward="${task.reward}">ابدأ</button>
                 </div>
             `;
-        }
-        container.innerHTML = html;
-    }
-    
-    function completeTask(taskId, reward, taskName) {
-        if(completedTasks.includes(taskId)) {
-            tg.showAlert('❌ لقد أكملت هذه المهمة مسبقاً');
-            return;
-        }
-        completedTasks.push(taskId);
-        localStorage.setItem(`tasks_${userId}`, JSON.stringify(completedTasks));
-        addPoints(reward, taskName);
-        loadTasks(); // تحديث القائمة
-    }
-    
-    function watchAd() {
-        addPoints(5, 'مشاهدة إعلان');
-    }
-    
-    function updateEarningsList() {
-        let container = document.getElementById('earningsList');
-        if(earningsHistory.length === 0) {
-            container.innerHTML = '<div style="text-align:center; opacity:0.5; padding:20px;">لا توجد أرباح بعد</div>';
-            return;
-        }
-        let html = '';
-        for(let item of earningsHistory) {
-            html += `
-                <div class="earning-item">
-                    <span>+${item.amount} نقطة</span>
-                    <span style="opacity:0.6; font-size:12px;">${item.reason}</span>
-                    <span style="opacity:0.5; font-size:10px;">${item.date}</span>
-                </div>
-            `;
-        }
-        container.innerHTML = html;
-    }
-    
-    function updateWithdrawHistory() {
-        let container = document.getElementById('withdrawHistory');
-        if(withdrawHistory.length === 0) {
-            container.innerHTML = '<div style="text-align:center; opacity:0.5; padding:20px;">لا توجد سحوبات سابقة</div>';
-            return;
-        }
-        let html = '';
-        for(let item of withdrawHistory) {
-            html += `
-                <div class="earning-item">
-                    <span>💸 ${item.amount} USDT</span>
-                    <span style="opacity:0.6;">${item.status}</span>
-                    <span style="opacity:0.5; font-size:10px;">${item.date}</span>
-                </div>
-            `;
-        }
-        container.innerHTML = html;
-    }
-    
-    function showDeposit() {
-        tg.showAlert('📥 للإيداع، تواصل مع الدعم @SupportBot');
-    }
-    
-    function showWithdraw() {
-        if(points < 500) {
-            tg.showAlert(t('lowBalance'));
-            return;
+            container.appendChild(card);
         }
         
-        let usdtAmount = (points / 1000).toFixed(2);
-        tg.showPopup({
-            title: '💸 سحب USDT',
-            message: `أنت تسحب ${usdtAmount} USDT\nأدخل عنوان محفظتك (TRC20):`,
-            buttons: [{type: 'ok', text: 'إرسال'}, {type: 'cancel'}]
-        }, (btnId) => {
-            if(btnId === 'ok') {
-                tg.showPopup({
-                    title: 'عنوان المحفظة',
-                    message: 'أدخل عنوان TRC20:',
-                    buttons: [{type: 'ok'}]
-                });
-            }
+        // إضافة أحداث الأزرار
+        document.querySelectorAll('.task-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                let id = btn.getAttribute('data-id');
+                let type = btn.getAttribute('data-type');
+                let target = btn.getAttribute('data-target');
+                let reward = parseInt(btn.getAttribute('data-reward'));
+                
+                if (type === 'youtube') {
+                    watchYouTube(id, target, reward);
+                } else if (type === 'direct_link') {
+                    openDirectLink(id, target, reward);
+                } else if (type === 'channel') {
+                    joinChannel(id, target, reward);
+                }
+            });
         });
     }
     
-    function getReferralLink() {
-        let botName = "YourBotName"; // غيرها لاسم البوت
-        return `https://t.me/${botName}?start=ref_${userId}`;
-    }
+    loadTasks();
+    updateBalanceUI();
     
-    function copyReferral() {
-        let link = getReferralLink();
-        navigator.clipboard.writeText(link);
-        tg.showAlert(t('copySuccess'));
-    }
-    
-    function updateReferralLink() {
-        document.getElementById('referralLink').innerText = getReferralLink();
-    }
-    
-    function toggleLanguage() {
-        currentLang = currentLang === 'ar' ? 'en' : 'ar';
-        localStorage.setItem('lang', currentLang);
-        document.getElementById('langBtn').innerText = currentLang === 'ar' ? '🇸🇦 العربية' : '🇬🇧 English';
-        updateUI();
-        loadTasks();
-    }
-    
-    // التبويبات
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        
-        document.getElementById(`${tabName}Tab`).classList.add('active');
-        document.querySelector(`.nav-item[data-tab="${tabName}"]`).classList.add('active');
-    }
-    
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => {
-            switchTab(item.getAttribute('data-tab'));
-        });
-    });
-    
-    // تهيئة اللغة عند البداية
-    function initLang() {
-        document.getElementById('langBtn').innerText = currentLang === 'ar' ? '🇸🇦 العربية' : '🇬🇧 English';
-    }
-    
-    // تحميل البيانات
-    loadData();
-    updateReferralLink();
-    initLang();
-    
-    // فتح تبويب الأرباح افتراضياً
-    switchTab('earnings');
+    // استقبال تحديث الرصيد من البوت (اختياري)
+    tg.onEvent('mainButtonClicked', () => {});
 </script>
 </body>
 </html>
