@@ -21,7 +21,7 @@
             min-height: 100vh;
         }
 
-        /* صورة الخلفية الزهرية */
+        /* خلفية زهرية ناعمة */
         body::before {
             content: '';
             position: fixed;
@@ -86,7 +86,7 @@
             font-size: 10px;
         }
 
-        /* بطاقة الرصيد الرئيسية */
+        /* بطاقة الرصيد */
         .balance-card {
             background: linear-gradient(135deg, #1a0a1a, #2d0a2d);
             border-radius: 32px;
@@ -134,7 +134,7 @@
             font-weight: bold;
         }
 
-        /* أزرار الإجراءات السريعة */
+        /* أزرار الإجراءات */
         .action-row {
             display: flex;
             gap: 12px;
@@ -191,7 +191,7 @@
             opacity: 0.7;
         }
 
-        /* كروت المهام */
+        /* قسم المهام */
         .section-title {
             display: flex;
             align-items: center;
@@ -288,18 +288,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* إعلان مميز */
-        .featured-ad {
-            background: linear-gradient(135deg, #FF1493, #FF69B4);
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-
         /* محفظة */
         .wallet-stats {
             display: flex;
@@ -320,6 +308,15 @@
             justify-content: space-between;
             padding: 12px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .deposit-address {
+            background: rgba(255,105,180,0.1);
+            border-radius: 16px;
+            padding: 12px;
+            margin-top: 16px;
+            text-align: center;
+            word-break: break-all;
         }
     </style>
 </head>
@@ -351,7 +348,7 @@
 
 <!-- أزرار سريعة -->
 <div class="action-row">
-    <div class="action-btn" onclick="showDeposit()">
+    <div class="action-btn" onclick="showDepositAddress()">
         📥 إيداع
     </div>
     <div class="action-btn" onclick="showWithdraw()">
@@ -367,22 +364,30 @@
     <div class="info-icon">💎</div>
     <div class="info-text">
         <strong>⭐ أربح معنا</strong>
-        <p>1000 نقطة = 1 USDT | حد السحب 1000 نقطة</p>
+        <p>1000 نقطة = 1 USDT | حد السحب 1000 نقطة | شبكة TRC20</p>
     </div>
 </div>
 
-<!-- تبويب الرئيسية (المهام) -->
+<!-- تبويب الرئيسية -->
 <div id="homeTab" class="tab-content active">
-    <div class="section-title">
-        <span>🎬</span> <span>إعلان مميز</span>
+    <div class="info-card">
+        <div class="info-icon">📌</div>
+        <div class="info-text">
+            <strong>مرحباً في لوحة التحكم</strong>
+            <p>اختر من القائمة السفلية لبدء المهام أو إدارة محفظتك</p>
+        </div>
     </div>
-    <div class="featured-ad" onclick="watchAd()">
-        <div>📺 شاهد إعلان فيديو</div>
-        <div class="task-reward">+5</div>
+    <div class="deposit-address">
+        <div>🏦 عنوان الإيداع (TRC20):</div>
+        <div style="font-weight: bold; margin: 8px 0;">TZDBiYhQujyQKCHZQPVK5N3ZBkKr6taY47</div>
+        <button onclick="copyDepositAddress()" style="background: #FF69B4; border: none; padding: 8px 16px; border-radius: 30px; margin-top: 5px;">📋 نسخ العنوان</button>
     </div>
+</div>
 
+<!-- تبويب المهام -->
+<div id="tasksTab" class="tab-content">
     <div class="section-title">
-        <span>📋</span> <span>المهام اليومية</span>
+        <span>📋</span> <span>المهام المتاحة</span>
     </div>
     <div id="tasksContainer"></div>
 </div>
@@ -455,13 +460,12 @@
     tg.expand();
     tg.ready();
     
-    // بيانات المستخدم من تلغرام
+    // بيانات المستخدم
     let user = tg.initDataUnsafe?.user || {};
     let userId = user.id;
     let userName = user.first_name || "مستخدم";
     let userUsername = user.username || "user";
     
-    // تحديث واجهة الترحيب
     document.getElementById('userName').innerText = userName;
     document.getElementById('userID').innerText = `@${userUsername}`;
     document.getElementById('avatarEmoji').innerHTML = userName.charAt(0).toUpperCase() || '🌸';
@@ -472,7 +476,6 @@
     let withdrawHistory = [];
     let completedTasks = JSON.parse(localStorage.getItem(`tasks_${userId}`) || '[]');
     
-    // تحميل البيانات المحفوظة
     function loadData() {
         let savedPoints = localStorage.getItem(`points_${userId}`);
         let savedRefs = localStorage.getItem(`refs_${userId}`);
@@ -502,10 +505,7 @@
     function addPoints(amount, reason) {
         points += amount;
         updateUI();
-        
-        // إرسال إلى البوت
         tg.sendData(JSON.stringify({action: 'add_points', amount: amount, reason: reason}));
-        
         tg.showPopup({
             title: '🎉 ربحت!',
             message: `+${amount} نقطة\nالسبب: ${reason}`,
@@ -546,7 +546,6 @@
         }
         
         if(type === 'youtube') {
-            // فتح الفيديو مع مؤقت
             window.open(url, '_blank');
             tg.showAlert('⏳ شاهد الفيديو لمدة 30 ثانية ثم اضغط "تم"');
             setTimeout(() => {
@@ -555,9 +554,7 @@
                     message: `بعد مشاهدة الفيديو، اضغط نعم لاستلام ${reward} نقطة`,
                     buttons: [{type: 'ok', text: 'نعم'}, {type: 'cancel', text: 'لا'}]
                 }, (btnId) => {
-                    if(btnId === 'ok') {
-                        completeTask(taskId, reward);
-                    }
+                    if(btnId === 'ok') completeTask(taskId, reward);
                 });
             }, 30000);
         } else if(type === 'link') {
@@ -586,9 +583,7 @@
             }, 5000);
         } else {
             window.open(url, '_blank');
-            setTimeout(() => {
-                completeTask(taskId, reward);
-            }, 3000);
+            setTimeout(() => completeTask(taskId, reward), 3000);
         }
     }
     
@@ -597,17 +592,29 @@
         completedTasks.push(taskId);
         localStorage.setItem(`tasks_${userId}`, JSON.stringify(completedTasks));
         addPoints(reward, `إتمام مهمة #${taskId}`);
-        loadTasks(); // تحديث القائمة
+        loadTasks();
     }
     
-    function watchAd() {
-        addPoints(5, 'مشاهدة إعلان');
+    // الإيداع
+    const DEPOSIT_ADDRESS = "TZDBiYhQujyQKCHZQPVK5N3ZBkKr6taY47";
+    
+    function showDepositAddress() {
+        tg.showPopup({
+            title: '🏦 عنوان الإيداع (TRC20)',
+            message: `أرسل USDT على شبكة TRC20 إلى العنوان التالي:\n\n${DEPOSIT_ADDRESS}\n\nسيتم إيداع الرصيد تلقائياً خلال 5-10 دقائق.`,
+            buttons: [{type: 'ok', text: 'نسخ العنوان'}]
+        }, () => {
+            navigator.clipboard.writeText(DEPOSIT_ADDRESS);
+            tg.showAlert('✅ تم نسخ العنوان');
+        });
     }
     
-    function showDeposit() {
-        tg.showAlert('📥 للإيداع، تواصل مع الدعم: @SupportBot');
+    function copyDepositAddress() {
+        navigator.clipboard.writeText(DEPOSIT_ADDRESS);
+        tg.showAlert('✅ تم نسخ عنوان الإيداع');
     }
     
+    // السحب
     function showWithdraw() {
         if(points < 1000) {
             tg.showAlert('❌ رصيدك أقل من 1000 نقطة (الحد الأدنى للسحب)');
@@ -616,68 +623,13 @@
         
         let usdtAmount = (points / 1000).toFixed(2);
         tg.showPopup({
-            title: '💸 سحب USDT',
-            message: `المبلغ: ${usdtAmount} USDT\nأدخل عنوان محفظتك:`,
-            buttons: [{type: 'ok', text: 'إرسال'}]
+            title: '💸 سحب USDT (TRC20)',
+            message: `المبلغ: ${usdtAmount} USDT\nأدخل عنوان محفظتك (TRC20):`,
+            buttons: [{type: 'ok', text: 'إرسال العنوان'}]
         }, () => {
-            tg.showAlert('📝 أرسل عنوان محفظتك في رسالة منفصلة إلى البوت');
-        });
-    }
-    
-    function getReferralLink() {
-        let botName = "YourBotName"; // غيرها لاسم البوت
-        return `https://t.me/${botName}?start=ref_${userId}`;
-    }
-    
-    function copyReferralLink() {
-        let link = getReferralLink();
-        navigator.clipboard.writeText(link);
-        tg.showAlert('✅ تم نسخ رابط الإحالة');
-    }
-    
-    function copyReferral() {
-        copyReferralLink();
-    }
-    
-    function updateReferralLink() {
-        document.getElementById('referralLink').innerHTML = getReferralLink();
-    }
-    
-    function updateWithdrawHistory() {
-        let container = document.getElementById('withdrawHistory');
-        if(withdrawHistory.length === 0) {
-            container.innerHTML = '<div style="text-align:center; opacity:0.5; padding:20px;">لا توجد سحوبات سابقة</div>';
-            return;
-        }
-        let html = '';
-        for(let item of withdrawHistory) {
-            html += `<div class="history-item"><span>💸 ${item.amount} USDT</span><span>${item.status}</span><span>${item.date}</span></div>`;
-        }
-        container.innerHTML = html;
-    }
-    
-    // التبويبات
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        
-        let tabId = tabName + 'Tab';
-        document.getElementById(tabId).classList.add('active');
-        document.querySelector(`.nav-item[data-tab="${tabName}"]`).classList.add('active');
-    }
-    
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => {
-            switchTab(item.getAttribute('data-tab'));
-        });
-    });
-    
-    // تحميل البيانات
-    loadData();
-    updateReferralLink();
-    
-    // فتح تبويب الرئيسية
-    switchTab('home');
-</script>
-</body>
-</html>
+            // طلب إدخال العنوان
+            tg.showPopup({
+                title: 'عنوان السحب (TRC20)',
+                message: 'أرسل عنوان محفظتك بصيغة TRC20:',
+                buttons: [{type: 'ok'}]
+ 
